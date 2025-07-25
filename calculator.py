@@ -50,12 +50,13 @@ while True:
     else:
       print(f"{num1} / {num2} = {divide(num1, num2)}")
   
-  
+  print("Want to continue? yes/no? \n")
+  choice = input()
+  if choice.lower() == "no":
+    print("Thank you for using our Calculator")
+    break
 
 
 
 
-    next_calc = input("Do you want to perform another calculation? (yes/no): ")
-    if next_calc.lower() != 'yes':
-        print("👋 Thanks for using the calculator.")
-        break
+
