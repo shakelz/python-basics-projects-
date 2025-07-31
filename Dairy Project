@@ -1,0 +1,77 @@
+import os
+import datetime
+
+timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+def add_entry():
+  entry = input("Enter Title:")
+  text = input("Enter the text:")
+  filename = f"{entry}.txt"
+  if(not os.path.exists(filename)):
+    with open(filename, "w") as f:
+      f.write(text)
+    print(f"✅New entry saved as '{filename}'")
+  else:
+    print("File already exists and data updated")
+    with open(filename, "a") as f:
+      f.write(text)
+
+def view_entries():
+    entries = []
+    for file in os.listdir():
+      if file.endswith(".txt"):
+        entries.append(file)
+      
+    if entries:
+        print("📂 Available Entries:")
+        for i, entry in enumerate(entries, 1):
+            print(f"{i}. {entry}")
+    else:
+        print("🚫 No diary entries found.")
+  
+def read_entry():
+    view_entries()
+    entry = input("Enter the title of the entry: ").strip()
+    filename = f"{entry}.txt"
+
+    if os.path.exists(filename):
+        with open(filename, "r") as f:
+            content = f.read()
+            print("\n----- 📖 Diary Entry -----")
+            print(content)
+            print("--------------------------\n")
+    else:
+        print("❌ Entry not found. Please check the title and try again.")
+
+def delete_entry():
+  entry = input("Enter the title of the entry:").strip()
+  filename = f"{entry}.txt"
+  if os.path.exists(filename):
+    os.remove(filename)
+    print(f"✅Entry '{filename}' has been deleted.")
+  else:
+    print("❌Entry not found. Please check the title and try again.")
+
+while True:
+
+  print("Welcome to My Diary 📖")
+  print("1. Add Entry\n2. View Entries\n3. Delete Entry\n4. Exit")
+  print("---------------------------------------------------")
+  try:
+    option = int(input("Enter your option: "))
+  except ValueError:
+    print("Invalid input. Please enter a number.")
+    continue
+
+  if option == 1:
+    add_entry()
+  elif option == 2:
+    view_entries()
+  elif option == 3:
+    delete_entry()
+  elif option == 4:
+    print("Exiting My Diary. Goodbye!")
+    break  
+  else:
+    print("Invalid option")
+
