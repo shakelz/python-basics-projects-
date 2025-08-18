@@ -1,167 +1,177 @@
 import csv
 import os
 
-#data = [['employee_name','employee_salary','employee_designation'],[employee_name,employe_salary,employee_designation]]
+# Constants
+FIELDNAMES = ["Employee_Id", "Employee_Name", "Employee_Salary", "Employee_Designation"]
 
 def create_csv_file(file_name):
+    """Create CSV file with headers if not exists"""
     if not os.path.exists(file_name):
         with open(file_name, "w", newline="") as file:
-            write = csv.writer(file)
-            write.writerow(['Employee_Id','Employee_Name','Employee_Salary','Employee_Designation'])
+            writer = csv.DictWriter(file, fieldnames=FIELDNAMES)
+            writer.writeheader()
             print("✅ Database Created!")
 
-
-def add_new_employee(file_name,employee_id,name,salary,designation):
-    print("Entered into the add new employee function...")
+def add_new_employee(file_name, employee_id, name, salary, designation):
+    """Add new employee to CSV"""
     try:
-        with open(file_name,'a') as csv_file:
-            write = csv.writer(csv_file)
-            write.writerow([employee_id,name,salary,designation])
-            print("✅ New Employee Added!")
-    except :
-        print(f"Error Found while adding the employee")
-    
+        with open(file_name, 'a', newline="") as file:
+            writer = csv.DictWriter(file, fieldnames=FIELDNAMES)
+            writer.writerow({
+                "Employee_Id": employee_id,
+                "Employee_Name": name,
+                "Employee_Salary": salary,
+                "Employee_Designation": designation
+            })
+        print("✅ New Employee Added!")
+    except Exception as e:
+        print(f"❌ Error adding employee: {str(e)}")
 
-def view_all_employees(file_name,employee_id = None):
-
+def view_all_employees(file_name, employee_id=None):
+    """View all or specific employee"""
     try:
-        with open(file_name) as csv_file:
-            reader = csv.DictReader(csv_file)
-            if employee_id == None:
-                print("✅ All Employee!")
-                for rows in reader:
-                    print(rows)
-
+        with open(file_name) as file:
+            reader = csv.DictReader(file)
+            if employee_id is None:
+                print("\n📋 All Employees:")
+                for row in reader:
+                    print(row)
             else:
-                print("✅ Selected Employee!")
-                for rows in reader:
-                    if int(rows["Employee_Id"]) == employee_id:
-                        print(rows)
-                    
-    except:
-        print(f"Error Found while fetching all the employee")
+                print("\n🔍 Employee Details:")
+                for row in reader:
+                    if int(row["Employee_Id"]) == employee_id:
+                        print(row)
+                        return
+                print("❌ Employee not found!")
+    except Exception as e:
+        print(f"❌ Error reading employees: {str(e)}")
 
-def Update_employee_details(file_name,Employee_Id = None,Employee_Name = None,Employee_Salary=None,Employee_Designation=None):
-    
+def update_employee_details(file_name, employee_id, name=None, salary=None, designation=None):
+    """Update employee details"""
     try:
         rows = []
-        with open(file_name) as csv_file:
-            update = csv.DictReader(csv_file)
-            for row in update:
-
-                if int(row["Employee_Id"]) == Employee_Id:
-                    if Employee_Name:
-                        row["Employee_Name"] = Employee_Name
-                        print("✅ Employee_Name updated!")
-                    elif Employee_Designation:
-                        row["Employee_Designation"] = Employee_Designation
-                        print("✅ Employee_Designation updated!")
-                    elif Employee_Salary:
-                        row["Employee_Salary"] == Employee_Salary
-                        print("✅ Employee_Salary updated!")
-                    else:
-                        print("Problem Eccoured while fetching and updating the value...")
-                print("Yaha tak agaya...")
-
+        updated = False
+        
+        with open(file_name) as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if int(row["Employee_Id"]) == employee_id:
+                    if name:
+                        row["Employee_Name"] = name
+                        updated = True
+                    if salary:
+                        row["Employee_Salary"] = salary
+                        updated = True
+                    if designation:
+                        row["Employee_Designation"] = designation
+                        updated = True
                 rows.append(row)
-                print("row append bhi hogaya...")
-        with open(file_name, 'w', newline="") as csv_file:
-            write = csv.DictWriter(csv_file, fieldnames= ["Employee_Id","Employee_Name","Employee_Salary","Employee_Designation"])
-            write.writeheader()
-            write.writerows(rows)
 
-    except:
-        print("Error found while fetching the file or updating employee details...")
+        if updated:
+            with open(file_name, 'w', newline="") as file:
+                writer = csv.DictWriter(file, fieldnames=FIELDNAMES)
+                writer.writeheader()
+                writer.writerows(rows)
+            print("✅ Employee updated successfully!")
+        else:
+            print("ℹ️ No changes made")
+    except Exception as e:
+        print(f"❌ Error updating employee: {str(e)}")
 
-
-def delete_employee(file_name, Employee_Id):
-    
+def delete_employee(file_name, employee_id):
+    """Delete employee by ID"""
     try:
         rows = []
-        with open(file_name) as csv_file:
-            update = csv.DictReader(csv_file)
-            for row in update:
-
-                if int(row["Employee_Id"]) != Employee_Id:
+        deleted = False
+        
+        with open(file_name) as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if int(row["Employee_Id"]) != employee_id:
                     rows.append(row)
-                    with open(file_name, 'w', newline="") as csv_file:
-                     write = csv.DictWriter(csv_file, fieldnames= ["Employee_Id","Employee_Name","Employee_Salary","Employee_Designation"])
-                     write.writeheader()
-                     write.writerows(rows)
-                     print("✅ Employee Deleted!")
                 else:
-                    print("Problem Eccoured while fetching and updating the value...")
-            
-        
-        
+                    deleted = True
 
-    except:
-        print("Error found while fetching the file or updating employee details...")
-
-
-
-organisation_name = input("Enter your organization name:-").lower().strip().replace(" ","_")
-file_name = f"{organisation_name}.csv"
-create_csv_file(file_name)
-
-while True:
-    
-    print("1. Add new Employee")
-    print("2. View all employees")
-    print("3. Search employee by ID")
-    print("4. Update employee details")
-    print("5. Delete employee")
-
-    try:
-        choice = int(input("Select the Operation you want to perform(1-5):- "))
-        print(f"{choice}:- {type(choice)}")
-        if choice > 0 and choice <= 5:
-            print("Entered into the if else loop")
-            if choice == 1:
-                print("Entered into 1 option")
-                employee_id = int(input("Enter the Employee_ID:-"))
-                employee_name = input("Enter the Employee_Name:-")
-                employee_designation = input("Enter the Employee_Designation:-")
-                employee_salary = input("Enter the Employee_Salary:-")
-                add_new_employee(file_name=file_name,employee_id=employee_id,name=employee_name,salary=employee_salary,designation=employee_designation)
-
-            elif choice == 2:
-                view_all_employees(file_name=file_name)
-
-            elif choice == 3:
-                emp_id = int(input("Enter the Employee_ID:-"))
-                view_all_employees(file_name=file_name,employee_id=emp_id)
-            elif choice == 4:
-                print("1. Want to update name?\n2. Want to update Salary?\n3. Want to update Designation?")
-                sub_choice = int(input("Enter the option:-"))
-                if sub_choice >0 and sub_choice <=3:
-                    emp_id = int(input("Enter the Employee_ID for which you want to update the value:- "))
-                    if sub_choice == 1:
-                        emp_name = input('Enter the New Employee_name:-')
-                        Update_employee_details(file_name=file_name,Employee_Id=emp_id,Employee_Name=emp_name)
-                    elif sub_choice == 2:
-                        emp_salary = input('Enter the New Employee Salary:-')
-                        Update_employee_details(file_name=file_name,Employee_Salary = emp_salary, Employee_Id=emp_id)
-                    elif sub_choice == 3:
-                        emp_designation = input('Enter the New Employee_Desgination:-')
-                        Update_employee_details(file_name=file_name,Employee_Designation = emp_designation,Employee_Id=emp_id)
-                    else:
-                        print(f"Problem occured while updating {sub_choice}....")
-                else:
-                    print("Enter the valid option")
-
-            elif choice == 5:
-
-                emp_id = int(input("Enter the Employee_ID:-"))
-
-                delete_employee(file_name=file_name, Employee_Id = emp_id)
+        if deleted:
+            with open(file_name, 'w', newline="") as file:
+                writer = csv.DictWriter(file, fieldnames=FIELDNAMES)
+                writer.writeheader()
+                writer.writerows(rows)
+            print("✅ Employee deleted successfully!")
         else:
-            print("invalid option selected, please select the correct option")
+            print("❌ Employee not found!")
+    except Exception as e:
+        print(f"❌ Error deleting employee: {str(e)}")
 
-        d = input("Want to continue (y/n):- ").lower()
-        if d == 'n':
+# Main program
+if __name__ == "__main__":
+    org_name = input("Enter your organization name: ").lower().strip().replace(" ", "_")
+    file_name = f"{org_name}.csv"
+    create_csv_file(file_name)
+
+    while True:
+        print("\n🏢 Employee Management System")
+        print("1. Add new Employee")
+        print("2. View all employees")
+        print("3. Search employee by ID")
+        print("4. Update employee details")
+        print("5. Delete employee")
+        print("6. Exit")
+
+        try:
+            choice = int(input("Select operation (1-6): "))
+            
+            if choice == 1:
+                emp_id = int(input("Employee ID: "))
+                name = input("Name: ")
+                salary = input("Salary: ")
+                designation = input("Designation: ")
+                add_new_employee(file_name, emp_id, name, salary, designation)
+                
+            elif choice == 2:
+                view_all_employees(file_name)
+                
+            elif choice == 3:
+                emp_id = int(input("Enter Employee ID: "))
+                view_all_employees(file_name, emp_id)
+                
+            elif choice == 4:
+                emp_id = int(input("Employee ID to update: "))
+                print("\nWhat to update?")
+                print("1. Name")
+                print("2. Salary")
+                print("3. Designation")
+                sub_choice = int(input("Select (1-3): "))
+                
+                if sub_choice == 1:
+                    name = input("New name: ")
+                    update_employee_details(file_name, emp_id, name=name)
+                elif sub_choice == 2:
+                    salary = input("New salary: ")
+                    update_employee_details(file_name, emp_id, salary=salary)
+                elif sub_choice == 3:
+                    designation = input("New designation: ")
+                    update_employee_details(file_name, emp_id, designation=designation)
+                else:
+                    print("❌ Invalid choice!")
+                    
+            elif choice == 5:
+                emp_id = int(input("Employee ID to delete: "))
+                delete_employee(file_name, emp_id)
+                
+            elif choice == 6:
+                print("👋 Exiting...")
+                break
+                
+            else:
+                print("❌ Invalid choice!")
+                
+        except ValueError:
+            print("❌ Please enter a valid number!")
+        except Exception as e:
+            print(f"❌ An error occurred: {str(e)}")
+
+        cont = input("\nContinue? (y/n): ").lower()
+        if cont != 'y':
+            print("👋 Exiting...")
             break
-
-    except:
-        print("Invalid option selected in the starting....")
-
